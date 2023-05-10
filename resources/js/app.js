@@ -4,6 +4,7 @@ import { createApp, h } from 'vue';
 import { createInertiaApp } from '@inertiajs/inertia-vue3';
 import { InertiaProgress } from '@inertiajs/progress';
 import Authenticated from '@/Layouts/Authenticated.vue';
+import VWave from 'v-wave';
 
 const appName = window.document.getElementsByTagName('title')[0]?.innerText || 'Laravel';
 
@@ -21,6 +22,7 @@ createInertiaApp({
     setup({ el, app, props, plugin }) {
         return createApp({ render: () => h(app, props) })
             .use(plugin)
+            .use(VWave)
             .mixin({ methods: { route } })
             .mount(el);
     },

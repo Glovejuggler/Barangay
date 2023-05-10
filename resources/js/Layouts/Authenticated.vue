@@ -1,28 +1,43 @@
 <script setup>
-import { ref } from 'vue';
-import BreezeApplicationLogo from '@/Components/ApplicationLogo.vue';
+import { ref, watch, onUnmounted } from 'vue';
+import { Inertia } from '@inertiajs/inertia';
 import BreezeDropdown from '@/Components/Dropdown.vue';
 import BreezeDropdownLink from '@/Components/DropdownLink.vue';
-import BreezeNavLink from '@/Components/NavLink.vue';
-import BreezeResponsiveNavLink from '@/Components/ResponsiveNavLink.vue';
-import { Link } from '@inertiajs/inertia-vue3';
 import Sidebar from '@/Components/Sidebar.vue';
-
-const showingNavigationDropdown = ref(false);
+import { useBreakpoints } from '@/Composables/useBreakpoint';
 
 const sidebarOpen = ref(localStorage.getItem('sidebar') ?? 'open');
+const width = ref(useBreakpoints());
+
+let finishEventListener = Inertia.on('finish', () => {
+    sidebarOpen.value = width.value < 1024 ? 'close' : sidebarOpen.value
+});
+
+onUnmounted(() => {
+    finishEventListener();
+})
+
+watch(width, () => {
+    if (width.value < 1024) {
+        sidebarOpen.value = 'close'
+    } else {
+        sidebarOpen.value = 'open'
+    }
+})
 </script>
 
 <template>
     <div>
-        <Sidebar :sidebarOpen="sidebarOpen" />
+        <Sidebar :isMobile="width < 1024" :sidebarOpen="sidebarOpen" />
+        <div class="fixed lg:hidden inset-0 bg-black/30 z-30" @click="sidebarOpen = 'close'" v-if="sidebarOpen === 'open'">
+        </div>
         <div class="min-h-screen bg-gray-100 duration-300 ease-in-out"
             :class="sidebarOpen === 'open' ? 'lg:pl-64' : 'lg:pl-16'">
             <nav class="bg-white border-b border-gray-100">
                 <!-- Primary Navigation Menu -->
                 <div class="px-4 sm:px-6 lg:px-2">
                     <div class="flex justify-between h-16 items-center">
-                        <div @click="sidebarOpen = sidebarOpen === 'open' ? 'close' : 'open'"
+                        <div @click="sidebarOpen = sidebarOpen === 'open' ? 'close' : 'open'" v-wave
                             class="flex items-center justify-center rounded-full hover:bg-black/5 w-12 h-12 cursor-pointer">
                             <i class='bx bx-menu text-3xl'></i>
                         </div>
@@ -53,47 +68,6 @@ const sidebarOpen = ref(localStorage.getItem('sidebar') ?? 'open');
                                     </template>
                                 </BreezeDropdown>
                             </div>
-                        </div>
-
-                        <!-- Hamburger -->
-                        <div class="-mr-2 flex items-center sm:hidden">
-                            <button @click="showingNavigationDropdown = !showingNavigationDropdown"
-                                class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 focus:text-gray-500 transition duration-150 ease-in-out">
-                                <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
-                                    <path
-                                        :class="{ 'hidden': showingNavigationDropdown, 'inline-flex': !showingNavigationDropdown }"
-                                        stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M4 6h16M4 12h16M4 18h16" />
-                                    <path
-                                        :class="{ 'hidden': !showingNavigationDropdown, 'inline-flex': showingNavigationDropdown }"
-                                        stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M6 18L18 6M6 6l12 12" />
-                                </svg>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Responsive Navigation Menu -->
-                <div :class="{ 'block': showingNavigationDropdown, 'hidden': !showingNavigationDropdown }"
-                    class="sm:hidden">
-                    <div class="pt-2 pb-3 space-y-1">
-                        <BreezeResponsiveNavLink :href="route('dashboard')" :active="route().current('dashboard')">
-                            Dashboard
-                        </BreezeResponsiveNavLink>
-                    </div>
-
-                    <!-- Responsive Settings Options -->
-                    <div class="pt-4 pb-1 border-t border-gray-200">
-                        <div class="px-4">
-                            <div class="font-medium text-base text-gray-800">{{ $page.props.auth.user.name }}</div>
-                            <div class="font-medium text-sm text-gray-500">{{ $page.props.auth.user.email }}</div>
-                        </div>
-
-                        <div class="mt-3 space-y-1">
-                            <BreezeResponsiveNavLink :href="route('logout')" method="post" as="button">
-                                Log Out
-                            </BreezeResponsiveNavLink>
                         </div>
                     </div>
                 </div>

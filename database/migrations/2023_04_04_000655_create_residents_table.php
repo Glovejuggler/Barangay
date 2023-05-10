@@ -20,6 +20,8 @@ class CreateResidentsTable extends Migration
             $table->string('last_name');
             $table->smallInteger('barangay_id');
             $table->string('address');
+            $table->boolean('verified')->nullable()->default(false);
+            $table->bigInteger('resident_number')->nullable();
             $table->timestamps();
         });
     }

@@ -6,6 +6,8 @@ use App\Models\Barangay;
 use App\Models\Resident;
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
+use App\Http\Requests\StoreResidentRequest;
+use App\Http\Requests\RegisterResidentRequest;
 
 class ResidentController extends Controller
 {
@@ -18,11 +20,11 @@ class ResidentController extends Controller
     {
         return inertia('Residents/Index', [
             'residents' => Resident::query()
-                                        ->filter($request->only(['search']))
+                                        ->filter($request->only(['search', 'status']))
                                         ->paginate(10)
                                         ->withQueryString(),
             'barangays' => Barangay::all(),
-            'filters' => $request->only(['search'])
+            'filters' => $request->only(['search', 'status'])
         ]);
     }
 
@@ -33,7 +35,9 @@ class ResidentController extends Controller
      */
     public function create()
     {
-        //
+        return inertia('Residents/Register', [
+            'barangays' => Barangay::all()
+        ]);
     }
 
     /**
@@ -42,15 +46,31 @@ class ResidentController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(StoreResidentRequest $request)
     {
-        // dd($request);
-        Resident::create([
-            'first_name' => $request->first_name,
-            'middle_name' => $request->middle_name,
-            'last_name' => $request->last_name,
-            'address' => $request->address,
-            'barangay_id' => $request->barangay_id,
+        Resident::create($request->validated());
+
+        return redirect()->back();
+    }
+
+    /**
+     * Stores a non-verified resident
+     */
+    public function register(RegisterResidentRequest $request)
+    {
+        Resident::create($request->validated());
+
+        return redirect()->back();
+    }
+
+    /**
+     * Verify a resident
+     */
+    public function verify(Resident $resident)
+    {
+        $resident->update([
+            'verified' => true,
+            'resident_number' => Resident::verified()->orderBy('resident_number', 'desc')->first()?->resident_number + 1
         ]);
 
         return redirect()->back();

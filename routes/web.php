@@ -28,14 +28,20 @@ Route::get('/', function () {
 
 Route::get('/dashboard', function () {
     return Inertia::render('Dashboard', [
-        'residents' => Resident::all()->count()
+        'residents' => Resident::all()->count(),
+        'verified' => Resident::verified()->count(),
+        'unverified' => Resident::unverified()->count()
     ]);
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 require __DIR__.'/auth.php';
 
+Route::get('register', [ResidentController::class, 'create'])->name('register');
+Route::post('register', [ResidentController::class, 'register']);
+
 Route::get('/residents', [ResidentController::class, 'index'])->name('residents.index');
 Route::post('/residents/store', [ResidentController::class, 'store'])->name('residents.store');
 Route::put('/residents/{resident}/update', [ResidentController::class, 'update'])->name('residents.update');
+Route::put('/residents/{resident}/verify', [ResidentController::class, 'verify'])->name('residents.verify');
 Route::delete('/resident/{resident}/delete', [ResidentController::class, 'destroy'])->name('residents.destroy');
 Route::get('resident/{resident}/pdf', [ResidentController::class, 'pdf'])->name('residents.pdf');

@@ -11,7 +11,7 @@ class Resident extends Model
     use HasFactory;
 
     protected $fillable = [
-        'first_name', 'middle_name', 'last_name', 'barangay_id', 'address'
+        'first_name', 'middle_name', 'last_name', 'barangay_id', 'address', 'verified', 'resident_number'
     ];
 
     protected $appends = [
@@ -32,12 +32,24 @@ class Resident extends Model
 
     public function getBarangayNumberAttribute()
     {
-        return sprintf('%02d', $this->barangay_id).'-'.sprintf('%06d', $this->id);
+        if ($this->resident_number) {
+            return sprintf('%02d', $this->barangay_id).'-'.sprintf('%06d', $this->resident_number);
+        }
     }
 
     public function barangay()
     {
         return $this->belongsTo(Barangay::class);
+    }
+
+    public function scopeVerified($query)
+    {
+        $query->where('verified', true);
+    }
+
+    public function scopeUnverified($query)
+    {
+        $query->where('verified', false);
     }
 
     public function scopeFilter($query, array $filters)
@@ -48,6 +60,12 @@ class Resident extends Model
                     ->orwhere('middle_name','like','%'.$search.'%')
                     ->orwhere('last_name','like','%'.$search.'%');
             });
+        })->when($filters['status'] ?? null, function ($query, $status) {
+            if ($status == 'verified') {
+                $query->verified();
+            } elseif ($status == 'unverified') {
+                $query->unverified();
+            }
         });
     }
 }

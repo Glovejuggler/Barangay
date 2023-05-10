@@ -1,13 +1,13 @@
 <template>
-    <div class="inset-y-0 left-0 fixed bg-white flex-col lg:flex hidden py-6 duration-300 ease-in-out overflow-hidden"
-        :class="sidebarOpen === 'open' ? 'w-64' : 'w-16'">
+    <div class="inset-y-0 left-0 fixed bg-white flex-col flex py-6 duration-300 ease-in-out overflow-hidden z-40"
+        :class="sidebarOpen === 'open' ? 'w-64' : 'w-16', { '-translate-x-full': isMobile && sidebarOpen === 'close' }">
         <div class="uppercase font-bold flex justify-center text-xl text-sky-600"
             :class="{ 'invisible': sidebarOpen === 'close' }">
             Barangay
         </div>
 
         <div class="mt-10">
-            <Link :href="route('dashboard')" class="flex group py-3"
+            <Link :href="route('dashboard')" class="flex group py-3" v-wave
                 :class="$page.url === '/dashboard' ? 'bg-sky-50' : 'hover:bg-gray-50'">
             <div class="flex items-center px-4 border-l-4 border-transparent"
                 :class="{ 'border-sky-600': $page.url === '/dashboard' }">
@@ -16,7 +16,7 @@
                     :class="$page.url === '/dashboard' ? 'text-sky-600' : 'text-gray-600 group-hover:text-black', { 'invisible': sidebarOpen === 'close' }">Dashboard</span>
             </div>
             </Link>
-            <Link :href="route('residents.index')" class="flex group py-3"
+            <Link :href="route('residents.index')" class="flex group py-3" v-wave
                 :class="$page.component.startsWith('Residents') ? 'bg-sky-50' : 'hover:bg-gray-50'">
             <div class="flex items-center px-4 border-l-4 border-transparent"
                 :class="{ 'border-sky-600': $page.component.startsWith('Residents') }">
@@ -37,7 +37,8 @@ export default {
         Link
     },
     props: {
-        sidebarOpen: String
+        sidebarOpen: String,
+        isMobile: Boolean
     },
     watch: {
         sidebarOpen: {
@@ -46,6 +47,6 @@ export default {
                 localStorage.setItem('sidebar', this.sidebarOpen)
             }
         }
-    }
+    },
 }
 </script>
